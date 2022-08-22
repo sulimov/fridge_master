@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\BookedBlocks;
 use Illuminate\Foundation\Http\FormRequest;
 
 class BookRequest extends FormRequest
@@ -23,12 +24,14 @@ class BookRequest extends FormRequest
      */
     public function rules()
     {
+        $dateTo =  date('Y-m-d', strtotime($this->date_from . ' +' . BookedBlocks::MAX_STORAGE_DAYS . ' days'));
+
         return [
             'location_id' => 'required|integer|exists:locations,id',
             'temperature' => 'required|integer',
             'volume' => 'required|integer',
             'date_from' => 'required|date|after_or_equal:today',
-            'date_to' => 'required|date|after:start_date',
+            'date_to' => 'required|date|after_or_equal:date_from|before_or_equal:' . $dateTo,
         ];
     }
 }
