@@ -32,6 +32,8 @@ class BookRequest extends FormRequest
             'volume' => 'required|integer',
             'date_from' => 'required|date|after_or_equal:today',
             'date_to' => 'required|date|after_or_equal:date_from|before_or_equal:' . $dateTo,
+            'name' => 'required|string',
+            'email' => 'required|email',
         ];
     }
 }

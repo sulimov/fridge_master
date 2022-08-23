@@ -12,6 +12,8 @@ class RoomRepository
         // +-2 degrees of the ordered, without crossing the border of 0 degrees
         $temperatureRange = [$temperature - 2, min($temperature + 2, -1)];
 
+        $blocksNumber = self::countBlocksByVolume($volume);
+
         return Room::from('rooms as r')
             ->select('r.id')
             ->where('r.location_id', '=', $location)
@@ -24,7 +26,18 @@ class RoomRepository
                     ->where('bb.date_to', '>=', $dateFrom);
             })
             ->groupByRaw('r.id, r.blocks')
-            ->havingRaw('r.blocks - IFNULL(SUM(bb.blocks_total), 0) >= ?', [$volume])
+            ->havingRaw('r.blocks - IFNULL(SUM(bb.blocks_total), 0) >= ?', [$blocksNumber])
             ->value('r.id');
     }
+
+    /**
+     * @param int $volume
+     * @return int
+     */
+    public static function countBlocksByVolume(int $volume) : int
+    {
+        return ceil($volume / 2);
+    }
+
+
 }

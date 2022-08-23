@@ -10,6 +10,9 @@ class Booking extends Model
 {
     use HasFactory;
 
+    // In a real system this value must be stored in the database
+    const DAILY_BLOCK_PRICE = 5;
+
     const STATUS_BOOKED = 1;
     const STATUS_CANCELED = 2;
     const STATUS_PAYED = 3;
