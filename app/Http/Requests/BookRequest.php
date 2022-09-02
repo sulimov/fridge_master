@@ -24,16 +24,14 @@ class BookRequest extends FormRequest
      */
     public function rules()
     {
-        $dateTo =  date('Y-m-d', strtotime($this->date_from . ' +' . BookedBlocks::MAX_STORAGE_DAYS . ' days'));
+        $dateTo = strtotime($this->date_from . ' +' . BookedBlocks::MAX_STORAGE_DAYS . ' days');
 
         return [
             'location_id' => 'required|integer|exists:locations,id',
-            'temperature' => 'required|integer',
-            'volume' => 'required|integer',
+            'temperature' => 'required|integer|max:-1',
+            'volume' => 'required|integer|min:1',
             'date_from' => 'required|date|after_or_equal:today',
-            'date_to' => 'required|date|after_or_equal:date_from|before_or_equal:' . $dateTo,
-            'name' => 'required|string',
-            'email' => 'required|email',
+            'date_to' => 'required|date|after_or_equal:date_from|before_or_equal:' . date('Y-m-d', $dateTo),
         ];
     }
 }

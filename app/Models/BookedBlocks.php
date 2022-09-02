@@ -10,9 +10,14 @@ class BookedBlocks extends Model
     const MAX_STORAGE_DAYS = 24;
 
     protected $fillable = [
+        'booking_id',
+        'active',
         'room_id',
+        'blocks_start',
+        'blocks_end',
         'date_from',
         'date_to',
+        'booked_temperature',
     ];
 
     use HasFactory;

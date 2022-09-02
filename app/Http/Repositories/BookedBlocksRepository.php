@@ -3,7 +3,6 @@
 namespace App\Http\Repositories;
 
 use App\Models\BookedBlocks;
-use App\Models\Room;
 
 class BookedBlocksRepository
 {
@@ -11,8 +10,9 @@ class BookedBlocksRepository
      * @param int $roomId
      * @param int $needBlocks
      * @return array|bool
+     * @throws \Exception
      */
-    public function getBlocksPosition(int $roomId, int $needBlocks) : array|bool
+    public function getBlocksPosition(int $roomId, int $needBlocks): array|bool
     {
         $activeBookedBlocks = BookedBlocks::select(['blocks_start', 'blocks_end'])
             ->where('room_id', '=', $roomId)
@@ -32,7 +32,7 @@ class BookedBlocksRepository
         $bookedBlocksCount = count($activeBookedBlocks);
         for ($i = 1; $i < $bookedBlocksCount; $i++) {
             $currentBlocksStart = $activeBookedBlocks[$i]['blocks_start'];
-            $prevBlocksEnd = $activeBookedBlocks[$i-1]['blocks_end'];
+            $prevBlocksEnd = $activeBookedBlocks[$i - 1]['blocks_end'];
 
             // Return the position after the end of the previous set of blocks if there is enough space before the next
             if ($currentBlocksStart - $prevBlocksEnd - 1 >= $needBlocks) {
@@ -41,12 +41,12 @@ class BookedBlocksRepository
         }
 
         // Return the position after the end of the last set of blocks if there is enough space before the end
-        $blocksInRoomTotal = Room::find($roomId)->value('blocks');
+        $blocksInRoomTotal = app(RoomRepository::class)->getColValueById($roomId, 'blocks');
         $lastBlocksSet = end($activeBookedBlocks);
         if ($blocksInRoomTotal - $lastBlocksSet['blocks_end'] >= $needBlocks) {
             return [$lastBlocksSet['blocks_end'] + 1, $lastBlocksSet['blocks_end'] + $needBlocks];
         }
 
-        return false;
+        throw new \Exception('No available blocks');
     }
 }

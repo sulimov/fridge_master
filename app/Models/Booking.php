@@ -18,6 +18,12 @@ class Booking extends Model
     const STATUS_PAYED = 3;
     const STATUS_REFUNDED = 4;
 
+    protected $fillable = [
+        'user_id',
+        'price',
+        'status',
+    ];
+
     public function booked_blocks() : HasMany
     {
         return $this->hasMany(BookedBlocks::class);
