@@ -1,125 +1,296 @@
-openapi: 3.0.3
+openapi: 3.0.0
 info:
-  title: Тестовое Laravel - Qberry (OpenAPI 3.0)
-  contact:
-    email: sulimovrg@gmail.com
-  version: 0.1.0
+  title: QBerry - Fridge Master
+  version: 1.0.0
 servers:
-  - url: http://localhost:8002/api
+  - url: http://fridge-master.test/api
 tags:
-  - name: locations
-    description: Get info about locations
-  - name: calculate
-    description: Calculate availability of blocks, price of product storage
-  - name: book
+  - name: user
+  - name: auth
 paths:
-  /locations:
+  /user/locations:
     get:
       tags:
-        - locations
-      summary: Get list of available locations
-      description: Get a list of available locations with information about the number of free blocks in each
-      operationId: getLocations
+        - user
+      summary: Locations
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+        - name: Authorization
+          in: header
+          schema:
+            type: string
       responses:
         '200':
-          description: Successful operation
+          description: OK
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Location'
-  /calculate:
+                type: object
+              example:
+                - id: 1
+                  name: Wilmington
+                  blocks:
+                    total: 4000
+                    available: 2500
+                - id: 2
+                  name: Portland
+                  blocks:
+                    total: 5000
+                    available: 2800
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Unauthenticated.
+  /user/book/calc:
     post:
       tags:
-        - calculate
-      summary: Add a new pet to the store
-      description: Add a new pet to the store
-      operationId: addPet
+        - user
+      summary: Book - Calc
       requestBody:
-        description: Create a new pet in the store
         content:
-          application/json:
+          multipart/form-data:
             schema:
-              $ref: '#/components/schemas/Calculator'
-          application/xml:
-            schema:
-              $ref: '#/components/schemas/Calculator'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/Calculator'
-        required: true
+              type: object
+              properties:
+                location_id:
+                  type: integer
+                  example: '1'
+                volume:
+                  type: integer
+                  example: '80'
+                temperature:
+                  type: number
+                  example: '-4'
+                date_from:
+                  type: string
+                  example: '2022-09-06'
+                date_to:
+                  type: string
+                  example: '2022-09-15'
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+        - name: Authorization
+          in: header
+          schema:
+            type: string
       responses:
         '200':
-          description: Successful operation
-        '405':
-          description: Invalid input
-components:
-  schemas:
-    Location:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        name:
-          type: string
-          example: Toronto
-        rooms:
-          type: array
-          xml:
-            wrapped: true
-          items:
-            $ref: '#/components/schemas/Room'
-        total_blocks:
-          type: integer
-          format: int64
-          example: 2400
-        total_available_blocks:
-          type: integer
-          format: int64
-          example: 2000
-      xml:
-        name: location
-    Room:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        temperature:
-          type: integer
-          example: -4
-        blocks:
-          type: integer
-          example: 800
-        available_blocks:
-          type: integer
-          example: 600
-      xml:
-        name: room
-    Calculator:
-      type: object
-      properties:
-        location_id:
-          type: integer
-          format: int32
-          example: 1
-        temperature:
-          type: integer
-          format: int32
-          example: -4
-        volume:
-          type: integer
-          format: int32
-          example: 200
-        date_from:
-          type: string
-          format: date
-        date_to:
-          type: string
-          format: date
-      xml:
-        name: order
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                blocks:
+                  need: 40
+                  available: 1200
+                price: 2000
+  /user/book:
+    post:
+      tags:
+        - user
+      summary: Book
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                location_id:
+                  type: integer
+                  example: '1'
+                volume:
+                  type: integer
+                  example: '80'
+                temperature:
+                  type: number
+                  example: '-4'
+                date_from:
+                  type: string
+                  example: '2022-09-06'
+                date_to:
+                  type: string
+                  example: '2022-09-15'
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                blocks:
+                  need: 40
+                  available: 1200
+                price: 2000
+  /user/my-bookings:
+    get:
+      tags:
+        - user
+      summary: My bookings
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                bookings:
+                  - id: 1
+                    price: 1600
+                    status: Paid
+                  - id: 2
+                    price: 2000
+                    status: Booked
+                total_paid: 1600
+                to_pay: 1000
+                location_date: '2022-09-10'
+  /user/my-bookings/1:
+    get:
+      tags:
+        - user
+      summary: My bookings - Booking
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                id: 1
+                price: 1600
+                status: Paid
+                access_code: 3489fj332d23
+                created_at: '2022-09-03 12:00:01'
+                updated_at: '2022-09-03 12:00:01'
+                date_from: '2022-09-06'
+                date_to: '2022-09-16'
+  /auth/register:
+    post:
+      tags:
+        - auth
+      summary: Auth - Register
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: test
+                email:
+                  type: string
+                  example: test@test.com
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Successfully Registered
+                password: PSuOfIkcJGUK
+        '422':
+          description: Unprocessable Content
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: The email has already been taken.
+                errors:
+                  email:
+                    - The email has already been taken.
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Auth - Login
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: test@test.com
+                password:
+                  type: string
+                  example: PSuOfIkcJGUK
+      parameters:
+        - name: X-Requested-With
+          in: header
+          schema:
+            type: string
+          example: XMLHttpRequest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Logged In Successfully
+                token: 1|v2Jhk8u9aNvTfYm6US1TQDWERAdSO7MWdknGAQUt
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+              example:
+                message: Invalid credentials
