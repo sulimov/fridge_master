@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -28,14 +29,31 @@ class AuthController extends Controller
                 'password' => Hash::make($password)
             ]);
 
-            return new JsonResponse(['password' => $password]);
+            return new JsonResponse([
+                'message' => 'Successfully Registered',
+                'password' => $password,
+            ]);
         } catch (\Throwable $exception) {
             return new JsonResponse($exception->getMessage(), 422);
         }
     }
 
-    public function login(LoginRequest $request)
+    public function login(LoginRequest $request): JsonResponse
     {
+        try {
+            if (!Auth::attempt($request->only(['email', 'password']))) {
+                return new JsonResponse(['message' => 'Invalid credentials'], 401);
+            }
 
+            $user = User::where('email', $request->email)->first();
+            $token = $user->createToken('API TOKEN')->plainTextToken;
+
+            return new JsonResponse([
+                'message' => 'Logged In Successfully',
+                'token' => $token,
+            ]);
+        } catch (\Throwable $exception) {
+            return new JsonResponse(['message' => $exception->getMessage()], 422);
+        }
     }
 }

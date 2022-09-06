@@ -55,7 +55,8 @@ class BookService
 
         try {
             // Store booking
-            $booking = $this->bookingService->store(1, $blocksCount, $request->date_from, $request->date_to);
+            $userId = Auth()->id();
+            $booking = $this->bookingService->store($userId, $blocksCount, $request->date_from, $request->date_to);
 
             // Store booked blocks
             $this->bookedBlocksService->store(
